@@ -59,6 +59,7 @@ func (evc EmailVerifyController) EmailVerify(w http.ResponseWriter, r *http.Requ
 	mx, err := net.LookupMX(emaildomain)
 	if err != nil {
 		log.Println("Failed: No MX records found.")
+		log.Println(err)
 		h.Question.JobEmailAddress = emailaddress
 		h.Question.JobStatus = "Failed"
 		h.Question.JobMessage = "Failed: No MX records found."
@@ -77,6 +78,7 @@ func (evc EmailVerifyController) EmailVerify(w http.ResponseWriter, r *http.Requ
 	c, err := smtp.Dial(mx[0].Host + ":25")
 	if err != nil {
 		log.Println("Failed: Cannot connect to MX: " + mx[0].Host)
+		log.Println(err)
 		h.Question.JobEmailAddress = emailaddress
 		h.Question.JobStatus = "Failed"
 		h.Question.JobMessage = "Failed: Cannot connect to MX: " + mx[0].Host
@@ -93,6 +95,7 @@ func (evc EmailVerifyController) EmailVerify(w http.ResponseWriter, r *http.Requ
 	err = c.Hello("blaas.io")
 	if err != nil {
 		log.Println("Failed: No hello from: " + mx[0].Host)
+		log.Println(err)
 		h.Question.JobEmailAddress = emailaddress
 		h.Question.JobStatus = "Failed"
 		h.Question.JobMessage = "Failed: No hello from: " + mx[0].Host
@@ -109,6 +112,7 @@ func (evc EmailVerifyController) EmailVerify(w http.ResponseWriter, r *http.Requ
 	err = c.Mail("verify-email-address@blaas.io")
 	if err != nil {
 		log.Println("Failed: No mail command: " + mx[0].Host)
+		log.Println(err)
 		h.Question.JobEmailAddress = emailaddress
 		h.Question.JobStatus = "Failed"
 		h.Question.JobMessage = "Failed: No mail command: " + mx[0].Host
@@ -124,6 +128,7 @@ func (evc EmailVerifyController) EmailVerify(w http.ResponseWriter, r *http.Requ
 
 	if err := c.Rcpt(emailaddress); err != nil {
 		log.Println("OK: Job done!")
+		log.Println(err)
 		h.Question.JobEmailAddress = emailaddress
 		h.Question.JobStatus = "OK"
 		h.Question.JobMessage = "OK: Job done!"
