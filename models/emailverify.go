@@ -15,11 +15,14 @@ type Question struct {
 
 // Answer struct
 type Answer struct {
-	EmailAddress     string    `json:"EmailAddress"`
-	EmailUser        string    `json:"EmailUser"`
-	EmailDomain      string    `json:"EmailDomain"`
-	ValidationResult string    `json:"ValidationResult"`
-	MXRecords        []*net.MX `json:"MXRecords"`
+	EmailAddress   string    `json:"EmailAddress"`
+	EmailUser      string    `json:"EmailUser"`
+	EmailDomain    string    `json:"EmailDomain"`
+	ValidationMAIL string    `json:"ValidationMAIL"`
+	ValidationVRFY string    `json:"ValidationVRFY"`
+	Postmaster     string    `json:"Postmaster"`
+	MXRecords      []*net.MX `json:"MXRecords"`
+	ExtraMessage   error     `json:"ExtraMessage"`
 }
 
 // Message for retunring

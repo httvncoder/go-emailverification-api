@@ -63,6 +63,7 @@ func (evc EmailVerifyController) EmailVerify(w http.ResponseWriter, r *http.Requ
 		h.Question.JobEmailAddress = emailaddress
 		h.Question.JobStatus = "Failed"
 		h.Question.JobMessage = "Failed: No MX records found."
+		h.Answer.ExtraMessage = err
 		// Marshal provided interface into JSON structure
 		hj, _ := json.MarshalIndent(h, "", "    ")
 		// Write content-type, statuscode, payload
@@ -82,6 +83,7 @@ func (evc EmailVerifyController) EmailVerify(w http.ResponseWriter, r *http.Requ
 		h.Question.JobEmailAddress = emailaddress
 		h.Question.JobStatus = "Failed"
 		h.Question.JobMessage = "Failed: Cannot connect to MX: " + mx[0].Host
+		h.Answer.ExtraMessage = err
 		// Marshal provided interface into JSON structure
 		hj, _ := json.MarshalIndent(h, "", "    ")
 		// Write content-type, statuscode, payload
@@ -99,6 +101,7 @@ func (evc EmailVerifyController) EmailVerify(w http.ResponseWriter, r *http.Requ
 		h.Question.JobEmailAddress = emailaddress
 		h.Question.JobStatus = "Failed"
 		h.Question.JobMessage = "Failed: No hello from: " + mx[0].Host
+		h.Answer.ExtraMessage = err
 		// Marshal provided interface into JSON structure
 		hj, _ := json.MarshalIndent(h, "", "    ")
 		// Write content-type, statuscode, payload
@@ -116,6 +119,7 @@ func (evc EmailVerifyController) EmailVerify(w http.ResponseWriter, r *http.Requ
 		h.Question.JobEmailAddress = emailaddress
 		h.Question.JobStatus = "Failed"
 		h.Question.JobMessage = "Failed: No mail command: " + mx[0].Host
+		h.Answer.ExtraMessage = err
 		// Marshal provided interface into JSON structure
 		hj, _ := json.MarshalIndent(h, "", "    ")
 		// Write content-type, statuscode, payload
@@ -126,13 +130,27 @@ func (evc EmailVerifyController) EmailVerify(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	if err := c.Verify("postmaster@" + emaildomain); err != nil {
+		h.Answer.Postmaster = "invalid"
+	} else {
+		h.Answer.Postmaster = "valid"
+	}
+
+	vrfyerr := c.Verify(emailaddress)
+	if vrfyerr != nil {
+		h.Answer.ValidationVRFY = "invalid"
+	} else {
+		h.Answer.ValidationVRFY = "valid"
+	}
+
 	if err := c.Rcpt(emailaddress); err != nil {
 		log.Println("OK: Job done!")
 		log.Println(err)
 		h.Question.JobEmailAddress = emailaddress
 		h.Question.JobStatus = "OK"
 		h.Question.JobMessage = "OK: Job done!"
-		h.Answer.ValidationResult = "invalid"
+		h.Answer.ValidationMAIL = "invalid"
+		h.Answer.ExtraMessage = err
 		// Marshal provided interface into JSON structure
 		hj, _ := json.MarshalIndent(h, "", "    ")
 		// Write content-type, statuscode, payload
@@ -148,7 +166,8 @@ func (evc EmailVerifyController) EmailVerify(w http.ResponseWriter, r *http.Requ
 	h.Question.JobEmailAddress = emailaddress
 	h.Question.JobStatus = "OK"
 	h.Question.JobMessage = "OK: Job done!"
-	h.Answer.ValidationResult = "valid"
+	h.Answer.ValidationMAIL = "valid"
+	h.Answer.ExtraMessage = err
 	// Marshal provided interface into JSON structure
 	hj, _ := json.MarshalIndent(h, "", "    ")
 	// Write content-type, statuscode, payload
@@ -156,6 +175,7 @@ func (evc EmailVerifyController) EmailVerify(w http.ResponseWriter, r *http.Requ
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(200)
 	fmt.Fprintf(w, "%s", hj)
+	err = c.Quit()
 }
 
 // ParseEmailAddress for splitting
