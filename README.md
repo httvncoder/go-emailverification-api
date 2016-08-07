@@ -30,12 +30,12 @@ Default values are:
 When it's started, test it with curl like the command below.
 
 ```
-curl http://localhost:3003/1/email/verify/email@example.com
+curl http://localhost:3003/v1/email/verify/email@example.com
 ```
 
 Explain:
 * Host and port: http://localhost:3003
-* Version of test: /1
+* Version of test: /v1
 * What to test: /email
 * What to do with it: verify
 * What email: email@example.com

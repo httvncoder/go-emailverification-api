@@ -42,7 +42,7 @@ func main() {
 	r := httprouter.New()
 
 	evc := controllers.NewEmailVerifyController()
-	r.GET("/1/email/verify/:emailaddress", evc.EmailVerify)
+	r.GET("/v1/email/verify/:emailaddress", evc.EmailVerify)
 
 	// Fire up the server
 	http.ListenAndServe(*ListenHost+":"+*ListenPort, r)
